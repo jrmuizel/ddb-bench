@@ -6,7 +6,7 @@ struct DIBSection {
 		struct {
 			BITMAPINFOHEADER bmiHeader;
 			RGBQUAD          bmiColors[3];
-		} bmi;
+		} bmi = {};
 		bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 		bmi.bmiHeader.biWidth = width;
 		bmi.bmiHeader.biHeight = -height; // top down

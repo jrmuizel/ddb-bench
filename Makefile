@@ -6,4 +6,4 @@ LDLIBS=-lmsimg32 -lstdc++
 all: ddb-bench
 
 clean:
-	ddb-bench
+	rm ddb-bench

@@ -122,10 +122,14 @@ void CreateMemHog()
 int main(int argc, char **argv)
 {
 
-	DIBSection dest(width, height);
 	DDB ddb_src(width, height);
 	DDB ddb_dst(width, height);
 	DIBSection src(width, height);
+	DIBSection dest(width, height);
+	DIBSection src_bi(width, height, DIBSection::BITFIELDS);
+	DIBSection dest_bi(width, height, DIBSection::BITFIELDS);
+	DIBSection src_bi_opaque(width, height, DIBSection::BITFIELDS_OPAQUE);
+	DIBSection dest_bi_opaque(width, height, DIBSection::BITFIELDS_OPAQUE);
 	DIBSection temp(width, height);
 	tempdib = temp.dc;
 	SYSTEM_INFO sysinfo;
@@ -153,6 +157,10 @@ int main(int argc, char **argv)
 			assert(src.bits[y*dest.width + x] == 0);
 			dest.bits[y*dest.width + x] = x+4;
 			src.bits[y*src.width + x] = x+4;
+			dest_bi.bits[y*dest_bi.width + x] = x+4;
+			src_bi.bits[y*src_bi.width + x] = x+4;
+			dest_bi_opaque.bits[y*dest_bi_opaque.width + x] = x+4;
+			src_bi_opaque.bits[y*src_bi_opaque.width + x] = x+4;
 		}
 	}
 
@@ -162,10 +170,28 @@ int main(int argc, char **argv)
 	BitBlt(tempdib, 0, 0, 1, 1, ddb_dst.dc, 0, 0, SRCCOPY);
 	BitBlt(tempdib, 0, 0, 1, 1, ddb_src.dc, 0, 0, SRCCOPY);
 
+	printf("RGB\n");
 	bench(ddb_dst.dc, ddb_src.dc, "ddb", "ddb");
 	bench(ddb_dst.dc, src.dc, "ddb", "dibsection");
 	bench(dest.dc, ddb_src.dc, "dibsection", "ddb");
 	bench(dest.dc, src.dc, "dibsection", "dibsection");
+
+#if 0
+	// On an AMD discrete GPU with XP, Intel Integrated on XP and Win7
+	// BITFIELDS and BITFIELDS_OPAQUE give similar results
+	printf("BITFIELDS\n");
+	bench(ddb_dst.dc, src_bi.dc, "ddb", "dibsection");
+	bench(dest_bi.dc, ddb_src.dc, "dibsection", "ddb");
+	bench(dest_bi.dc, src_bi.dc, "dibsection", "dibsection");
+	printf("BITFIELDS_OPAQUE\n");
+	bench(ddb_dst.dc, src_bi_opaque.dc, "ddb", "dibsection");
+	bench(dest_bi_opaque.dc, ddb_src.dc, "dibsection", "ddb");
+	bench(dest_bi_opaque.dc, src_bi_opaque.dc, "dibsection", "dibsection");
+	printf("MIXED\n");
+	bench(dest.dc, src_bi.dc, "dibsection", "dibsection");
+	bench(dest.dc, src_bi_opaque.dc, "dibsection", "dibsection");
+#endif
+
 	printf("alpha\n");
 	alpha_bench(ddb_dst.dc, ddb_src.dc, "ddb", "ddb");
 	alpha_bench(ddb_dst.dc, src.dc, "ddb", "dibsection");
